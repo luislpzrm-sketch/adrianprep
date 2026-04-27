@@ -93,7 +93,7 @@ input,textarea{outline:none;font-family:inherit}
 var KEY='adriancoach3';
 var D=ldata();
 function ldata(){try{var r=localStorage.getItem(KEY);return r?JSON.parse(r):def()}catch(e){return def()}}
-function def(){return{checkins:[],mlogs:[],dietDone:{},water:{},aday:0,setDone:{},setWeights:{},restDays:{},dietMode:{},suples:{},weeksDone:{},selRec:{}}}
+function def(){return{checkins:[],mlogs:[],dietDone:{},water:{},aday:0,setDone:{},setWeights:{},restDays:{},dietMode:{},dietHora:{},suples:{},weeksDone:{},selRec:{}}}
 function sv(){try{localStorage.setItem(KEY,JSON.stringify(D))}catch(e){}}
 function today(){return new Date().toISOString().split('T')[0]}
 
@@ -173,9 +173,89 @@ var DC=[
   ]}
 ];
 
+// Dieta entreno manana 8h — post-entreno en desayuno/media manana
+var DN_M=[
+  {t:'06:30',n:'Pre-entreno',k:200,p:10,c:35,g:3,tag:'PRE',items:[
+    '1 platano maduro + cafe negro sin azucar',
+    'OPC: 30g avena con agua + 1 platano',
+    'Ligero — el objetivo es carburante rapido, no llenarte'
+  ]},
+  {t:'09:00',n:'Post-entreno — comida clave del dia',k:620,p:52,c:65,g:12,tag:'POST',items:[
+    'PROTEINA: 200g pechuga pollo plancha / 180g lomo cerdo / 3 huevos + 4 claras',
+    'CARBO: 80g arroz blanco crudo (arrocera) / 250g patata hervida / 90g pasta',
+    'Verdura: tomate, espinacas, brocoli libre',
+    '1 cucharada aceite oliva',
+    '🍔 OPC SALUDABLE: Hamburguesa casera — 200g carne picada 5% + pan integral + queso light + lechuga (ver Recetas)',
+    '🍕 OPC SALUDABLE: Pizza proteica — base integral + pollo + mozzarella light (ver Recetas)',
+    'CRITICO: comer en los 60 min post-entreno maximiza la recuperacion muscular'
+  ]},
+  {t:'13:30',n:'Comida',k:500,p:42,c:50,g:12,tag:'',items:[
+    'PROTEINA: 180g merluza / dorada / salmon / gambas / lomo cerdo',
+    'CARBO: 70g arroz crudo / 200g patata / 80g pasta',
+    'Verdura abundante y ensalada',
+    '1 cucharada aceite oliva'
+  ]},
+  {t:'17:00',n:'Merienda',k:300,p:26,c:32,g:7,tag:'',items:[
+    'OPC A: 200g queso fresco batido 0% + melocoton o sandia',
+    'OPC B: Yogur griego 0% + fruta',
+    'OPC C: 2 huevos duros + tortitas de arroz'
+  ]},
+  {t:'20:30',n:'Cena — antes 21h',k:480,p:40,c:46,g:11,tag:'',items:[
+    'OPC ESPECIAL: barra pan integral + 1/2 aguacate + 80g salmon ahumado + 50g queso fresco 0%',
+    'OPC NORMAL: 180g merluza / pollo / lomo cerdo plancha',
+    'CARBO: 60g arroz crudo / 180g patata hervida',
+    'Verdura libre',
+    '🍔 OPC SALUDABLE: Hamburguesa casera (ver Recetas)',
+    '🍕 OPC SALUDABLE: Pizza proteica (ver Recetas)'
+  ]}
+];
+
+// Dieta entreno tarde 18h — post-entreno en cena
+var DN_T=[
+  {t:'07:30',n:'Desayuno',k:460,p:36,c:52,g:12,tag:'',items:[
+    'OPC A: 3 huevos revueltos + 2-3 rebanadas pan integral molde con tomate + aceite',
+    'OPC B: Tortilla 3 huevos + pan integral molde con tomate',
+    'OPC C: 200g yogur griego 0% + 50g avena + melocoton o sandia',
+    'Cafe solo sin azucar'
+  ]},
+  {t:'11:00',n:'Media manana',k:290,p:28,c:26,g:8,tag:'',items:[
+    'OPC A: 200g queso fresco batido 0% + 25g nueces o almendras',
+    'OPC B: 2 huevos duros + melocoton o fruta',
+    'OPC C: 100g pechuga pavo sin sal + tortitas de arroz'
+  ]},
+  {t:'14:00',n:'Comida',k:580,p:46,c:60,g:13,tag:'',items:[
+    'PROTEINA: 200g pechuga pollo / 180g lomo cerdo / 180g merluza / 200g salmon',
+    'CARBO: 80g arroz crudo / 250g patata / 90g pasta',
+    'Verdura libre: ensalada / brocoli / espinacas',
+    '1 cucharada aceite oliva',
+    '🍔 OPC SALUDABLE: Hamburguesa casera — 200g carne picada 5% + pan integral + queso light (ver Recetas)',
+    '🍕 OPC SALUDABLE: Pizza proteica — base integral + pollo + mozzarella light (ver Recetas)'
+  ]},
+  {t:'16:30',n:'Pre-entreno',k:280,p:18,c:42,g:5,tag:'PRE',items:[
+    '1 platano + cafe negro sin azucar — 90 min antes de entrenar',
+    'OPC: 40g avena + 1 platano',
+    'No comas grasa aqui — ralentiza la digestion'
+  ]},
+  {t:'20:00',n:'Post-entreno — cena clave',k:580,p:52,c:55,g:12,tag:'POST',items:[
+    'PROTEINA: 200g pechuga pollo / 180g lomo cerdo / 3 huevos + 4 claras / 200g gambas',
+    'CARBO: 70g arroz crudo / 200g patata / 80g pasta — NO eliminar el carbo post-entreno',
+    'OPC ESPECIAL: barra pan integral + 1/2 aguacate + 80g salmon ahumado + 50g queso fresco 0%',
+    '1 cucharada aceite oliva',
+    'CRITICO: comer antes de las 21h aunque hayas entrenado — prioridad maxima'
+  ]}
+];
+
 var RECETAS=[
   {id:'burger',icon:'🍔',name:'Hamburguesa Casera Saludable',kcal:580,p:52,c:40,g:18,tiempo:'20 min',utensilios:'Sartenon o Freidora de aire',
-   ing:['200g carne picada ternera 5% grasa (carniceria)','1 pan hamburguesa integral','1 loncha queso light','2 hojas lechuga + 2 rodajas tomate','1/2 cebolla roja en aros','Sal pimienta ajo en polvo','Ketchup sin azucar + mostaza'],
+   ing:[
+    {i:'200g carne picada ternera 5% grasa',d:'Carniceria de barrio — pide "ternera picada con poca grasa". Mercadona tiene en bandeja pero la carniceria es mejor calidad'},
+    {i:'1 pan hamburguesa integral o proteico',d:'Mercadona — seccion pan de molde, busca "pan hamburguesa integral". Lidl tambien los tiene mas baratos'},
+    {i:'1-2 lonchas queso light en lonchas',d:'Mercadona o Lidl — cualquier queso light en lonchas. Evita el normal, dobla las calorias'},
+    {i:'Lechuga romana + 2 rodajas tomate',d:'Cualquier super — lo mas barato posible, no importa la marca'},
+    {i:'1/2 cebolla roja',d:'Mercadona o Lidl — la roja da mejor sabor que la blanca en crudo'},
+    {i:'Ketchup sin azucar + mostaza',d:'Mercadona — ketchup Heinz sin azucar (botella verde) o marca Hacendado sin azucar. Mostaza cualquiera'},
+    {i:'Sal, pimienta negra, ajo en polvo',d:'Mercadona Hacendado — los tres en bote pequeno, muy baratos y duran meses'}
+   ],
    pasos:[
     {t:'Prepara la carne',d:'Mezcla la carne con sal, pimienta y ajo en polvo. Forma una bola y aplastala hasta 2cm de grosor. No la trabajes demasiado o queda dura.'},
     {t:'SARTENON',d:'Sarten a fuego alto sin aceite. Hamburguesa 3-4 min sin moverla. Una sola vuelta. Otros 3 min. Queso encima y tapa 1 minuto.'},
@@ -183,9 +263,17 @@ var RECETAS=[
     {t:'Tuesta el pan',d:'Sarten sin aceite 1 min por lado o freidora 2 min a 160 grados. El pan tostado no se deshace.'},
     {t:'Monta y come',d:'Lechuga y tomate de base, carne, queso, cebolla, ketchup sin azucar y mostaza. Comela caliente.'}
    ],
-   nota:'Pidela en la carniceria: "200g ternera picada con poca grasa". Congela porciones de 200g para tener siempre a mano.'},
+   nota:'Compra en la carniceria: "200g ternera picada con poca grasa". Congela porciones de 200g ya formadas para tener siempre a mano — saca del congelador la noche anterior.'},
   {id:'pizza',icon:'🍕',name:'Pizza Proteica Casera',kcal:600,p:50,c:55,g:14,tiempo:'25 min',utensilios:'Horno o Freidora de aire',
-   ing:['1 base pizza proteica o integral (Mercadona/Lidl congelados)','150g pechuga pollo cocida desmenuzada','80g tomate frito sin azucar','60g mozzarella light rallada','1/2 pimiento rojo en tiras','Oregano abundante','50g jamon york sin grasa (opcional)'],
+   ing:[
+    {i:'1 base pizza proteica o integral',d:'Mercadona — seccion congelados, "base pizza fina" o "base pizza integral". Lidl mas barata. Si no encuentras, tortilla grande de trigo integral'},
+    {i:'150g pechuga pollo cocida y desmenuzada',d:'Mercadona — pechuga fresca en bandeja o ya cocida en bolsa (seccion charcuteria frio). La fresca es mas barata'},
+    {i:'80g tomate frito sin azucar',d:'Mercadona Hacendado — bote pequeno "tomate frito sin azucar anadido". Tambien en Lidl'},
+    {i:'60g mozzarella light rallada',d:'Mercadona — bolsa "mozzarella light rallada" en seccion lacteos. Lidl la tiene mas barata en oferta'},
+    {i:'1/2 pimiento rojo',d:'Cualquier super — muy barato al peso'},
+    {i:'Oregano seco abundante',d:'Mercadona Hacendado — bote de oregano, menos de 1 euro y dura mucho'},
+    {i:'50g jamon york sin grasa visible (opcional)',d:'Mercadona — jamon cocido extra en lonchas, seccion charcuteria. El "El Pozo sin grasa" es buena opcion'}
+   ],
    pasos:[
     {t:'Precalienta',d:'HORNO a 200 grados arriba y abajo. FREIDORA DE AIRE a 180 grados — mas rapida y la base mas crujiente.'},
     {t:'Prepara la base',d:'Saca del congelador 5 minutos antes. Extiende el tomate dejando 1 dedo de borde limpio. No mucho tomate o se empapa.'},
@@ -193,9 +281,18 @@ var RECETAS=[
     {t:'Hornea',d:'HORNO: 12-14 minutos hasta que el queso burbujee. FREIDORA: 8-10 minutos a 180 grados. Vigila los ultimos 2 minutos.'},
     {t:'Reposa y sirve',d:'2 minutos antes de cortar. El queso se asienta. Corta en 4 — come 3 y guarda 1 para otro dia.'}
    ],
-   nota:'Busca bases proteicas en Mercadona o Lidl seccion congelados. Si no encuentras, una tortilla de trigo integral grande hace de base improvisada.'},
+   nota:'Lista de la compra express: base congelada (Mercadona/Lidl) + pollo fresco bandeja (Mercadona) + tomate sin azucar Hacendado + mozzarella light bolsa. Todo en menos de 10 euros.'},
   {id:'bowl',icon:'🌮',name:'Bowl Mexicano Saludable',kcal:590,p:47,c:58,g:16,tiempo:'20 min',utensilios:'Sartenon + Arrocera u Olla',
-   ing:['180g pechuga pollo en tiras','80g arroz blanco crudo','1/2 aguacate maduro','80g maiz lata escurrido','80g frijoles negros lata escurridos','100g tomate cherry cortado','1/2 lima o limon','Comino pimenton ajo en polvo sal'],
+   ing:[
+    {i:'180g pechuga pollo en tiras',d:'Mercadona — bandeja pechuga fresca. Carniceria si quieres mejor calidad'},
+    {i:'80g arroz blanco crudo',d:'Mercadona Hacendado — arroz largo. El mas barato posible, es arroz'},
+    {i:'1/2 aguacate maduro',d:'Mercadona o Lidl — compra 2-3 a la vez, los que esten duros maduran en 2-3 dias fuera de la nevera'},
+    {i:'80g maiz en lata escurrido',d:'Mercadona Hacendado — lata maiz dulce, muy barata. Lidl tambien'},
+    {i:'80g frijoles negros en lata',d:'Mercadona — lata alubias negras. Si no tienen, alubias rojas tambien valen'},
+    {i:'100g tomate cherry',d:'Mercadona o Lidl — bandeja tomate cherry. O tomate normal cortado'},
+    {i:'1/2 lima o limon',d:'Mercadona — bolsa de limas o limones. El limon es mas facil de encontrar y igual de valido'},
+    {i:'Comino, pimenton, ajo en polvo',d:'Mercadona Hacendado — los tres en bote. Menos de 1 euro cada uno'}
+   ],
    pasos:[
     {t:'Arroz en arrocera',d:'Arroz lavado + doble de agua. Pulsa coccion. 15 minutos sin vigilar. OLLA: agua hirviendo con sal, 15 min fuego medio, escurre.'},
     {t:'Sazona el pollo',d:'Mezcla comino, pimenton, ajo en polvo, sal y pimienta. Cubre las tiras. Deja 5 minutos si puedes.'},
@@ -203,9 +300,17 @@ var RECETAS=[
     {t:'Guacamole express',d:'Aplasta el aguacate con tenedor. Zumo de lima, sal y ajo en polvo. 2 minutos. No necesita nada mas.'},
     {t:'Monta el bowl',d:'Base de arroz, pollo encima, maiz y frijoles a los lados, tomate cherry, guacamole. Unas gotas de lima. Mezcla todo antes de comer.'}
    ],
-   nota:'Prepara doble de pollo y arroz. El bowl se monta en 2 minutos si tienes los ingredientes listos en la nevera. Perfecto para cuando hay pereza de cocinar.'},
+   nota:'Prepara doble de pollo y arroz el domingo. El bowl se monta en 2 minutos si tienes los ingredientes listos en la nevera. Perfecto para cuando hay pereza de cocinar.'},
   {id:'bolonesa',icon:'🍝',name:'Pasta Bolonesa Limpia',kcal:580,p:46,c:62,g:12,tiempo:'25 min',utensilios:'Olla + Sartenon',
-   ing:['90g pasta integral o normal cruda','180g carne picada ternera 5% grasa','200g tomate triturado Hacendado','1/2 cebolla picada fina','2 dientes ajo','Oregano albahaca sal pimienta','1 cucharadita aceite oliva','20g parmesano rallado (opcional)'],
+   ing:[
+    {i:'90g pasta integral o normal cruda',d:'Mercadona Hacendado — espagueti o penne integral. Lidl mas barata. La normal tambien vale, poca diferencia'},
+    {i:'180g carne picada ternera 5% grasa',d:'Carniceria — misma que la hamburguesa. Mercadona en bandeja si no tienes carniceria cerca'},
+    {i:'200g tomate triturado Hacendado',d:'Mercadona — brik o lata tomate triturado Hacendado. De los mas baratos del super'},
+    {i:'1/2 cebolla + 2 dientes ajo',d:'Mercadona o Lidl — lo mas barato posible, es cebolla y ajo'},
+    {i:'Oregano, albahaca, sal, pimienta',d:'Mercadona Hacendado — botes de especias. Duran meses'},
+    {i:'1 cucharadita aceite oliva virgen extra',d:'Mercadona Hacendado — botella pequena de AOVE. Mejor calidad que el aceite de girasol para este uso'},
+    {i:'20g parmesano rallado (opcional)',d:'Mercadona — bolsita parmesano rallado en seccion quesos. No es barato pero una bolsa dura semanas'}
+   ],
    pasos:[
     {t:'Cuece la pasta',d:'Olla con agua abundante y sal. Cuando hierva echa la pasta. El tiempo del paquete menos 1 minuto — la acabas en la salsa. Reserva un vaso del agua de coccion.'},
     {t:'Sofrie la base',d:'Sartenon fuego medio con el aceite. Cebolla 5 minutos hasta transparente. Ajo picado 1 minuto mas. No dejes que se queme.'},
@@ -213,9 +318,14 @@ var RECETAS=[
     {t:'Construye la salsa',d:'Tomate triturado, oregano y albahaca. Fuego medio-bajo. Tapa 10 minutos. Si espesa mucho, un poco del agua de la pasta.'},
     {t:'Une pasta y salsa',d:'Escurre la pasta y echala en la sarten con la salsa. Mezcla 1 minuto a fuego medio. La pasta absorbe la salsa y queda mucho mejor. Parmesano por encima.'}
    ],
-   nota:'Prepara el doble de salsa y congela la mitad en bolsas pequenas. Proxima vez tienes pasta en 12 minutos: solo cueces la pasta y descongelassla salsa.'},
+   nota:'Prepara el doble de salsa y congela la mitad en bolsas pequenas. Proxima vez tienes pasta en 12 minutos: solo cueces la pasta y descongelas la salsa.'},
   {id:'patatas',icon:'🥔',name:'Patatas Freidora de Aire + Pollo',kcal:550,p:48,c:55,g:10,tiempo:'30 min',utensilios:'Freidora de aire',
-   ing:['200g patata pelada en gajos o dados','200g pechuga pollo entera o en trozos','Aceite en spray o 1 cucharadita','Ajo en polvo pimenton sal oregano'],
+   ing:[
+    {i:'200g patata para freir o de uso multiple',d:'Mercadona o Lidl — bolsa patatas. La variedad "Monalisa" o "Kennebec" queda mejor crujiente'},
+    {i:'200g pechuga pollo entera o en trozos',d:'Mercadona bandeja o carniceria. La de carniceria mas jugosa'},
+    {i:'Aceite en spray o 1 cucharadita AOVE',d:'Mercadona — spray de aceite de oliva (seccion aceites). Mucho mas practico para la freidora que el aceite normal'},
+    {i:'Ajo en polvo, pimenton, sal, oregano',d:'Mercadona Hacendado — todos en bote. Pimenton dulce o picante segun gusto'}
+   ],
    pasos:[
     {t:'Prepara las patatas',d:'Corta en gajos o dados del mismo tamano. Seca bien con papel de cocina — la humedad es el enemigo del crujiente. Mezcla con aceite en spray, sal y pimenton.'},
     {t:'Primera tanda patatas',d:'Freidora a 200 grados 15 minutos. A mitad de tiempo agita la cesta. Doradas y crujientes por fuera, tiernas por dentro.'},
@@ -225,7 +335,13 @@ var RECETAS=[
    ],
    nota:'La freidora de aire es la mejor inversion para este plan. Sin aceite, sin manchar, en la mitad de tiempo. Si no tienes, horno a 220 grados funciona en 5-10 minutos mas.'},
   {id:'lomo',icon:'🥩',name:'Lomo de Cerdo con Patatas',kcal:540,p:50,c:48,g:14,tiempo:'25 min',utensilios:'Sartenon grande + Freidora de aire u Olla',
-   ing:['200g lomo cerdo en filetes (2x100g)','250g patata en dados','2 dientes ajo laminados','Romero tomillo sal pimienta','1 cucharadita aceite oliva','50ml caldo de pollo para la salsa (opcional)'],
+   ing:[
+    {i:'200g lomo de cerdo en filetes (2x100g)',d:'Carniceria o Mercadona — "filetes de lomo de cerdo". En Mercadona en bandeja, muy barato. Pide en carniceria que te lo corten fino'},
+    {i:'250g patata',d:'Mercadona o Lidl — bolsa patatas uso multiple'},
+    {i:'2 dientes ajo laminados',d:'Mercadona — cabeza de ajos, menos de 1 euro y dura semanas'},
+    {i:'Romero, tomillo, sal, pimienta',d:'Mercadona Hacendado — romero y tomillo en bote. Si no tienes, solo sal y pimienta funciona igual de bien'},
+    {i:'50ml caldo de pollo (opcional)',d:'Mercadona — brick caldo de pollo Hacendado. O disuelve media pastilla de caldo en 50ml agua caliente'}
+   ],
    pasos:[
     {t:'Patatas primero',d:'FREIDORA: 200 grados 15 minutos con aceite en spray y sal. OLLA: dados de patata en agua con sal 12 minutos hasta tiernos pero no deshechos.'},
     {t:'Sella el lomo',d:'Sartenon a fuego alto. Sin aceite o spray minimo. Lomo seco con papel antes. Sella 2-3 minutos por lado sin moverlo. Tiene que quedar dorado oscuro.'},
@@ -315,7 +431,11 @@ function showTab(tab){curEx=null;document.querySelectorAll('.nb').forEach(functi
 function rDiet(){
   var td=today(),done=D.dietDone[td]||{},water=D.water[td]||0;
   var mode=(D.dietMode&&D.dietMode[td])||'normal';
-  var DIET=mode==='capricho'?DC:DN;
+  var hora=(D.dietHora&&D.dietHora[td])||'tarde';
+  var DIET;
+  if(mode==='capricho'){DIET=DC;}
+  else if(hora==='manana'){DIET=DN_M;}
+  else{DIET=DN_T;}
   var nd=Object.values(done).filter(Boolean).length;
   var kcal=DIET.reduce(function(s,m,i){return done[i]?s+m.k:s},0);
   var pct=Math.round(nd/DIET.length*100);
@@ -333,14 +453,28 @@ function rDiet(){
   h+='<button onclick="setRD(false)" style="background:'+(isRest?'#1a1a1a':'#818cf8')+';border:none;border-radius:8px;color:'+(isRest?'#555':'#fff')+';padding:5px 12px;font-size:11px;cursor:pointer;font-family:inherit;font-weight:700">ENTRENO</button>';
   h+='<button onclick="setRD(true)" style="background:'+(isRest?'#1e3a5f':'#1a1a1a')+';border:none;border-radius:8px;color:'+(isRest?'#60a5fa':'#555')+';padding:5px 12px;font-size:11px;cursor:pointer;font-family:inherit;font-weight:700">DESCANSO</button>';
   h+='</div></div>';
-  h+='<div style="display:flex;gap:6px;margin-bottom:12px">';
-  h+='<button class="dtab'+(mode==='normal'?' on':'')+'" onclick="setDM(\'normal\')" style="background:'+(mode==='normal'?'#818cf8':'#1a1a2e')+';color:'+(mode==='normal'?'#fff':'#888')+';border:none;border-radius:8px;padding:9px;flex:1;cursor:pointer;font-family:inherit;font-weight:700;font-size:11px">DIETA NORMAL</button>';
-  h+='<button class="dtab'+(mode==='capricho'?' on':'')+'" onclick="setDM(\'capricho\')" style="background:'+(mode==='capricho'?'#f97316':'#1a1a2e')+';color:'+(mode==='capricho'?'#fff':'#888')+';border:none;border-radius:8px;padding:9px;flex:1;cursor:pointer;font-family:inherit;font-weight:700;font-size:11px">CAPRICHO SANO</button>';
+  h+='<div style="display:flex;gap:6px;margin-bottom:6px">';
+  h+='<button onclick="setDM(\'normal\')" style="background:'+(mode==='normal'?'#818cf8':'#1a1a2e')+';color:'+(mode==='normal'?'#fff':'#888')+';border:none;border-radius:8px;padding:9px;flex:1;cursor:pointer;font-family:inherit;font-weight:700;font-size:11px">DIETA NORMAL</button>';
+  h+='<button onclick="setDM(\'capricho\')" style="background:'+(mode==='capricho'?'#f97316':'#1a1a2e')+';color:'+(mode==='capricho'?'#fff':'#888')+';border:none;border-radius:8px;padding:9px;flex:1;cursor:pointer;font-family:inherit;font-weight:700;font-size:11px">CAPRICHO SANO</button>';
   h+='</div>';
-  if(mode==='capricho'){
-    h+='<div style="background:#1a0f00;border:1px solid #f9731633;border-radius:8px;padding:8px 12px;margin-bottom:10px">';
-    h+='<div style="font-size:11px;color:#f97316;font-weight:700;margin-bottom:2px">MODO CAPRICHO ACTIVO</div>';
-    h+='<div style="font-size:11px;color:#888">Almuerzo libre con receta saludable. Cena siempre limpia. Ve al tab Recetas para ver como prepararlo.</div>';
+  if(mode==='normal'){
+    h+='<div style="display:flex;gap:6px;margin-bottom:10px">';
+    h+='<button onclick="setDH(\'manana\')" style="background:'+(hora==='manana'?'#22c55e':'#1a1a2e')+';color:'+(hora==='manana'?'#fff':'#888')+';border:none;border-radius:8px;padding:8px;flex:1;cursor:pointer;font-family:inherit;font-weight:700;font-size:10px">☀️ ENTRENO 8H</button>';
+    h+='<button onclick="setDH(\'tarde\')" style="background:'+(hora==='tarde'?'#22c55e':'#1a1a2e')+';color:'+(hora==='tarde'?'#fff':'#888')+';border:none;border-radius:8px;padding:8px;flex:1;cursor:pointer;font-family:inherit;font-weight:700;font-size:10px">🌙 ENTRENO 18H</button>';
+    h+='</div>';
+    h+='<div style="background:#0a1a0a;border:1px solid #22c55e33;border-radius:8px;padding:7px 12px;margin-bottom:10px">';
+    if(hora==='manana'){
+      h+='<div style="font-size:11px;color:#22c55e;font-weight:700;margin-bottom:1px">PRE a las 6:30h · POST como primera comida fuerte a las 9h</div>';
+      h+='<div style="font-size:10px;color:#555">El post-entreno sustituye al desayuno grande. Maximo beneficio de la ventana anabolica.</div>';
+    } else {
+      h+='<div style="font-size:11px;color:#22c55e;font-weight:700;margin-bottom:1px">PRE a las 16:30h · POST como cena antes de las 21h</div>';
+      h+='<div style="font-size:10px;color:#555">Comidas normales hasta el entreno. El post-entreno es la cena — no eliminar carbos aqui.</div>';
+    }
+    h+='</div>';
+  } else {
+    h+='<div style="background:#1a0f00;border:1px solid #f9731633;border-radius:8px;padding:7px 12px;margin-bottom:10px">';
+    h+='<div style="font-size:11px;color:#f97316;font-weight:700;margin-bottom:1px">MODO CAPRICHO ACTIVO</div>';
+    h+='<div style="font-size:10px;color:#888">Almuerzo libre con receta saludable. Cena siempre limpia. Ve a Recetas para ver como prepararlo.</div>';
     h+='</div>';
   }
   h+='<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin-bottom:12px">';
@@ -357,15 +491,19 @@ function rDiet(){
   h+='</div></div></div>';
   DIET.forEach(function(m,i){
     var isDone=!!done[i];
+    var tag=m.tag||'';
+    var isPre=tag==='PRE',isPost=tag==='POST';
+    var accentCol=isPost?'#22c55e':isPre?'#f97316':'#818cf8';
     h+='<div class="mcard'+(isDone?' done':'')+'" onclick="togM('+i+')">';
     h+='<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:5px">';
     h+='<div style="display:flex;align-items:center;gap:8px"><div class="mchk'+(isDone?' ok':'')+'">'+( isDone?'✓':'')+'</div>';
-    h+='<div><div style="font-size:11px;color:#818cf8;font-weight:700">'+m.t+'</div><div style="font-size:13px;font-weight:700">'+m.n+'</div></div></div>';
-    h+='<div style="text-align:right"><div style="font-size:16px;font-weight:900;color:#818cf8">'+m.k+'</div><div style="font-size:9px;color:#555">kcal</div></div></div>';
+    h+='<div><div style="display:flex;align-items:center;gap:6px"><div style="font-size:11px;color:'+accentCol+';font-weight:700">'+m.t+'</div>'+(tag?'<div style="font-size:9px;background:'+accentCol+'22;color:'+accentCol+';padding:1px 7px;border-radius:10px;font-weight:900">'+tag+'</div>':'')+'</div><div style="font-size:13px;font-weight:700">'+m.n+'</div></div></div>';
+    h+='<div style="text-align:right"><div style="font-size:16px;font-weight:900;color:'+accentCol+'">'+m.k+'</div><div style="font-size:9px;color:#555">kcal</div></div></div>';
     h+='<div style="display:flex;gap:10px;margin-bottom:5px"><span style="font-size:10px;color:#60a5fa">P '+m.p+'g</span><span style="font-size:10px;color:#818cf8">C '+m.c+'g</span><span style="font-size:10px;color:#f97316">G '+m.g+'g</span></div>';
     m.items.forEach(function(it){
       var isSano=it.indexOf('OPC SALUDABLE')>=0;
-      h+='<div style="font-size:12px;color:'+(isSano?'#f97316':'#888')+';margin-bottom:3px'+(isSano?';font-weight:700':'')+'">'+(isSano?'':'-  ')+it+'</div>';
+      var isCrit=it.indexOf('CRITICO')>=0;
+      h+='<div style="font-size:12px;color:'+(isSano?'#f97316':isCrit?'#22c55e':'#888')+';margin-bottom:3px'+(isSano||isCrit?';font-weight:700':'')+'">'+(isSano?'':'-  ')+it+'</div>';
     });
     h+='</div>';
   });
@@ -408,6 +546,7 @@ function rDiet(){
   document.getElementById('app').innerHTML=h;
 }
 function setDM(m){D.dietMode=D.dietMode||{};D.dietMode[today()]=m;sv();rDiet();}
+function setDH(h){D.dietHora=D.dietHora||{};D.dietHora[today()]=h;sv();rDiet();}
 function selReceta(id){D.selRec=D.selRec||{};D.selRec[today()]=id;sv();rDiet();}
 function togM(i){var td=today();D.dietDone[td]=D.dietDone[td]||{};D.dietDone[td][i]=!D.dietDone[td][i];sv();rDiet();}
 function togS(id){var td=today();D.suples=D.suples||{};D.suples[td]=D.suples[td]||{};D.suples[td][id]=!D.suples[td][id];sv();rDiet();}
@@ -436,7 +575,12 @@ function rRecetas(){
       h+='<div style="margin-top:12px;border-top:1px solid #1a1a2e;padding-top:12px">';
       h+='<div style="font-size:10px;color:#818cf8;letter-spacing:1px;margin-bottom:7px">INGREDIENTES</div>';
       h+='<div style="background:#0a0a0a;border-radius:8px;padding:10px;margin-bottom:12px">';
-      rec.ing.forEach(function(ig){h+='<div style="font-size:12px;color:#aaa;margin-bottom:3px"><span style="color:#818cf8">•</span> '+ig+'</div>';});
+      rec.ing.forEach(function(ig){
+        h+='<div style="margin-bottom:8px">';
+        h+='<div style="display:flex;gap:8px;align-items:flex-start"><span style="color:#818cf8;flex-shrink:0">•</span><span style="font-size:12px;color:#f0f0f0;font-weight:700">'+ig.i+'</span></div>';
+        h+='<div style="font-size:11px;color:#555;margin-left:16px;margin-top:2px;line-height:1.4">📍 '+ig.d+'</div>';
+        h+='</div>';
+      });
       h+='</div>';
       h+='<div style="font-size:10px;color:#818cf8;letter-spacing:1px;margin-bottom:8px">PASO A PASO</div>';
       rec.pasos.forEach(function(p,pi){
